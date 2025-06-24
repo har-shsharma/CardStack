@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useContext,
   createContext,
-  forwardRef,
 } from "react";
 import { cn } from "@/lib/utils";
 
@@ -100,20 +99,8 @@ export const CardBody = ({
 };
 
 
-type CardItemProps<Tag extends ElementType> = {
-  as?: Tag;
-  children: ReactNode;
-  className?: string;
-  translateX?: number | string;
-  translateY?: number | string;
-  translateZ?: number | string;
-  rotateX?: number | string;
-  rotateY?: number | string;
-  rotateZ?: number | string;
-} & Omit<ComponentPropsWithRef<Tag>, "as" | "children" | "className">;
-
-export const CardItem = <Tag extends ElementType = "div">({
-  as,
+export const CardItem = <T extends HTMLElement>({
+  as: Tag = "div",
   children,
   className,
   translateX = 0,
@@ -123,28 +110,38 @@ export const CardItem = <Tag extends ElementType = "div">({
   rotateY = 0,
   rotateZ = 0,
   ...rest
-}: CardItemProps<Tag>) => {
+}: {
+  as?: React.ElementType;
+  children: React.ReactNode;
+  className?: string;
+  translateX?: number | string;
+  translateY?: number | string;
+  translateZ?: number | string;
+  rotateX?: number | string;
+  rotateY?: number | string;
+  rotateZ?: number | string;
+} & React.HTMLAttributes<T>) => {
+  const ref = useRef<T>(null);
   const [isMouseEntered] = useMouseEnter();
-  const TagComp = as || "div";
-
-  const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
-    if (isMouseEntered) {
-      ref.current.style.transform = `translateX(${translateX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
-    } else {
-      ref.current.style.transform = `translateX(0px) translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
-    }
+    handleAnimations();
   }, [isMouseEntered]);
 
+  const handleAnimations = () => {
+    if (!ref.current) return;
+    ref.current.style.transform = isMouseEntered
+      ? `translateX(${translateX}px) translateY(${translateY}px) translateZ(${translateZ}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`
+      : `translateX(0px) translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg)`;
+  };
+
   return (
-    <TagComp
-      ref={ref as React.Ref<any>} 
+    <Tag
+      ref={ref as React.Ref<T>}
       className={cn("w-fit transition duration-200 ease-linear", className)}
       {...rest}
     >
       {children}
-    </TagComp>
+    </Tag>
   );
 };
