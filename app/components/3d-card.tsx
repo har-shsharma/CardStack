@@ -1,7 +1,4 @@
 import React, {
-  ElementType,
-  ComponentPropsWithRef,
-  ReactNode,
   useRef,
   useEffect,
   useContext,
